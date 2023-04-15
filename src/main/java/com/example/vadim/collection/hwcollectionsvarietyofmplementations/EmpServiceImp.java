@@ -5,37 +5,34 @@ import com.example.vadim.collection.hwcollectionsvarietyofmplementations.excepti
 import com.example.vadim.collection.hwcollectionsvarietyofmplementations.exception.EmployeeStorageIsFullException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+
 @Service
-
 public class EmpServiceImp implements EmpService{
-    public final List<Employee> employeeList;
+    private final Map<String,Employee> employees;
 
-    public EmpServiceImp(List<Employee> employeeList) {
-        this.employeeList = employeeList;
+    public EmpServiceImp(List<Employee> employees) {
+        this.employees = new HashMap<>();
     }
 
     @Override
     public Employee add(String name, String surname) {
-        if (employeeList.size() >= 10) {
+        if (employees.size() >= 10) {
             throw new EmployeeStorageIsFullException("Нельзя добавить работника, привышен придел");
         }
         Employee employee = new Employee(name, surname);
-        if (employeeList.contains(employee)) {
+        if (employees.containsKey(employee.getFullName())) {
             throw new EmployeeAlreadyAddedException();
         }
-        employeeList.add(employee);
+        employees.put(employee.getFullName(),employee);
         return employee;
     }
 
     @Override
     public Employee remove(String name, String surname) {
         Employee employee = new Employee(name, surname);
-        if (employeeList.contains(employee)) {
-            employeeList.remove(employee);
-            return employee;
+        if (employees.containsKey(employee.getFullName())) {
+            return employees.remove(employee.getFullName());
         }
         throw new EmployeeNotFoundException();
     }
@@ -43,14 +40,14 @@ public class EmpServiceImp implements EmpService{
     @Override
     public Employee find(String name, String surname) {
         Employee employee = new Employee(name, surname);
-        if (employeeList.contains(employee)) {
-            return employee;
+        if (employees.containsKey(employee.getFullName())) {
+            return employees.get(employee.getFullName());
         }
         throw new EmployeeNotFoundException();
     }
 
     @Override
     public Collection<Employee> findAll() {
-        return new ArrayList<>(employeeList);
+        return Collections.unmodifiableCollection(employees.values());
     }
 }
